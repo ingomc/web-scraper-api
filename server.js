@@ -22,11 +22,11 @@ function scrape() {
         var $t = $(this);
         var title = $t.text();
         var href = $t.attr("href");
+        var event = new Date();
+        var date = event.toISOString();
         href = url + href;
-        let metadata = {
-          title: title,
-          url: href
-        };
+        
+        let metadata = { title: title, url: href, date: date };
         //   console.log(metadata);
           request(
             {
