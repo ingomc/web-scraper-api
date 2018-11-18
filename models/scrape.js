@@ -7,7 +7,8 @@ var mongoose = restful.mongoose;
 var scraperSchema = new mongoose.Schema({
     title: { type: String, unique: true },
     url: String,
-    date: String
+    date: String,
+    img: String
 });
 
 // Return model

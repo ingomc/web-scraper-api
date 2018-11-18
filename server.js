@@ -13,44 +13,13 @@ let searchTerm = false;
 let delay = "20";
 
 
-function scrape() {
-  var day = new Date();
-  console.log(day.toString("dddd, MMMM ,yyyy") + " >> " + "Start Scraping");
-  request(url, function(error, response, body) {
-    if (!error && response.statusCode == 200) {
-      const $ = cheerio.load(body);
-      $(".post__title a").each(function(i, element) {
-        var $t = $(this);
-        var title = $t.text();
-        var href = $t.attr("href");
-        var event = new Date();
-        var date = event.toISOString();
-        href = url + href;
-        
-        let metadata = { title: title, url: href, date: date };
-        //   console.log(metadata);
-          request(
-            {
-                  url: API_URL,
-              method: "POST",
-              headers: {
-                "content-type": "application/json"
-              },
-              json: metadata
-              //  body: JSON.stringify(requestData)
-            },
-            function(error, resp, body) {
-              console.log(body);
-            }
-          );
-      });
-    }
-  });
-}
-
 
 // MongoDB
-mongoose.connect('mongodb://localhost/scraper', { useNewUrlParser: true });
+mongoose.connect('mongodb://localhost/scraper', function () {
+  /* Drop the DB */
+  mongoose.connection.db.dropDatabase();
+},
+{ useNewUrlParser: true });
 
 // Express
 var app = express();
@@ -66,6 +35,47 @@ app.get('/', function (req, res) {
 // Start server
 app.listen(3000);
 console.log('API is running on port 3000');
+
+
+
+function scrape() {
+  var day = new Date();
+  console.log(day.toString("dddd, MMMM ,yyyy") + " >> " + "Start Scraping");
+  request(url, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      const $ = cheerio.load(body);
+      $(".post").each(function (i, element) {
+        var $t = $(this);
+        var title = $t.find(".post__title a").text();
+        var href = $t.find(".post__title a").attr("href");
+        var image = $t.find(".post-image img").attr("src");
+        var event = new Date();
+        var date = event.toISOString();
+        href = url + href;
+
+        let metadata = { title: title, url: href, img: image, date: date };
+        //   console.log(metadata);
+        request(
+          {
+            url: API_URL,
+            method: "POST",
+            headers: {
+              "content-type": "application/json"
+            },
+            json: metadata
+            //  body: JSON.stringify(requestData)
+          },
+          function (error, resp, body) {
+            console.log(body);
+          }
+        );
+      });
+    }
+  });
+}
+
+
+
 
 scrape();
 
